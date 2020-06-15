@@ -90,9 +90,7 @@ func (t *Timestamp) toUTCZTimestamp() string {
 	got := time.Unix(t.seconds, t.nanoSeconds)
 	utcLoc, _ := time.LoadLocation("UTC")
 	utcTime := got.In(utcLoc)
-	fmt.Println(utcTime)
 	tStr := utcTime.Format("2006-01-02T15:04:05.000Z")
-	fmt.Println(tStr)
 	return tStr
 }
 
@@ -135,19 +133,107 @@ func (t *NanosecondTimestamp) ConvertUTCZ(value string) string {
 	return t.ts.toUTCZTimestamp()
 }
 
-func (t *Timestamp) toGoTimestring() string {
+// Convert the timestamp to a time.Time object
+func (t *Timestamp) ToGoTime() time.Time {
 	unixTime := time.Unix(t.seconds, t.nanoSeconds) //gives unix time stamp in utc
-	fmt.Println(unixTime)
-	return ""
-}
-func (t *SecondTimestamp) ToGoTimestring() string {
-	return t.ts.toGoTimestring()
+	return unixTime
 }
 
-func (t *MillisecondTimestamp) ToGoTimestring() string {
-	return t.ts.toGoTimestring()
+func (t *SecondTimestamp) ToGoTime() time.Time {
+	return t.ts.ToGoTime()
 }
 
-func (t *NanosecondTimestamp) ToGoTimestring() string {
-	return t.ts.toGoTimestring()
+func (t *MillisecondTimestamp) ToGoTime() time.Time {
+	return t.ts.ToGoTime()
+}
+
+func (t *NanosecondTimestamp) ToGoTime() time.Time {
+	return t.ts.ToGoTime()
+}
+
+// NextHourTimestamp returns the next hour timestamp in nanoseconds
+func NextHourTimestamp() int64 {
+	now := time.Now().UnixNano()
+	// Get the current hour in timestamp
+	hour := int64(60 * 60 * 1000000000)
+	thisHour := (now / int64(hour))
+	// Determin next hour
+	nextHour := thisHour + 1
+	// Convert back to nanoseconds
+	nextHourNs := nextHour * hour
+	return nextHourNs
+}
+
+// NextDayTimestamp returns the next hour timestamp in nanoseconds
+func NextDayTimestamp() int64 {
+	now := time.Now()
+	// Convert to to just date part
+	dateT := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.Local)
+	// Add one day to create a new time object
+	future := dateT.AddDate(0, 0, 1)
+	// Convert to timestamp
+	timestamp := future.UnixNano()
+	return timestamp
+}
+
+// NextMinuteTimestamp returns the next minute mark timestamp in nanoseconds
+func NextMinuteTimestamp(interval int64) int64 {
+	// Get current times
+	seconds := time.Now().Unix()
+	// Current mark
+	currentMinute := seconds / 60                             // minutes
+	minuteOfHour := currentMinute % 60                        // minutes
+	currentMarkOfHour := (minuteOfHour / interval) * interval // minutes
+	// Next Mark
+	nextMarkOfHour := currentMarkOfHour + interval
+	nextMarkSeconds := currentMinute + nextMarkOfHour - minuteOfHour
+	nextMarkNanoSecs := nextMarkSeconds * 60000000000
+	return nextMarkNanoSecs
+}
+
+// UTCZtoLocalTimestamp convert a UTCZ string to a local timestamp
+func UTCZtoLocalTimestamp(utczString string) int64 {
+	t, err := time.Parse("2006-01-02T15:04:05.000Z", utczString)
+	if err != nil {
+		return -1
+	}
+
+	lt := t.Local()
+
+	return lt.UnixNano()
+}
+
+// UTCZToUTCTimestamp converts UTCZ timestring to UTC timestamp.
+func UTCZToUTCTimestamp(utczString string) int64 {
+	t, err := time.Parse("2006-01-02T15:04:05.000Z", utczString)
+
+	if err != nil {
+		return -1
+	}
+	return t.UnixNano()
+}
+
+func TimestampToLocalTimestring(ts int64) string {
+
+	nsts := NanosecondTimestamp{}
+	nsts.Set(ts)
+	t := nsts.ToGoTime()
+	lt := t.Local()
+	return lt.Format("2006-01-02T15:04:05.000")
+}
+
+func TimestampToUTCZTimestring(ts int64) string {
+	nsts := NanosecondTimestamp{}
+	nsts.Set(ts)
+	return nsts.ToUTCZ()
+}
+
+// UTCTimestamp returns the UTC timestamp
+func UTCTimestamp() int64 {
+	return time.Now().UTC().UnixNano()
+}
+
+func Nanoseconds(tSec float64) int64 {
+	t := tSec * 1000000000
+	return int64(t)
 }

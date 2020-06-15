@@ -1,0 +1,14 @@
+
+
+Convert to 
+
+Output timestams
+ - UTCTimestamp: Returns timestamp for the current UTC time
+ - LocalTimestamp: Returns timestamp for the current local time
+ - UTCZToUTCTimestamp: Converts UTCZ timestring to UTC timestamp
+ - UTCZtoLocalTimestamp: Convert UTCZ timestring to Local timestamp
+
+ Output timestring
+ - LocalTimestampNSToUTCZ: Returns timestring for local timestamp
+ - UTCTimestampToUTCZ: Convert UTC timestamp to UTCZ timestring
+ 
