@@ -191,7 +191,7 @@ func NextMinuteTimestamp(interval int64) int64 {
 	return nextMarkNanoSecs
 }
 
-// UTCZtoLocalTimestamp convert a UTCZ string to a local timestamp
+// UTCZtoLocalTimestamp convert a UTCZ string to a local timestamp.
 func UTCZtoLocalTimestamp(utczString string) int64 {
 	t, err := time.Parse("2006-01-02T15:04:05.000Z", utczString)
 	if err != nil {
@@ -222,18 +222,42 @@ func TimestampToLocalTimestring(ts int64) string {
 	return lt.Format("2006-01-02T15:04:05.000")
 }
 
+func TimestampToTimestringNoMilli(ts int64) string {
+	nsts := NanosecondTimestamp{}
+	nsts.Set(ts)
+	t := nsts.ToGoTime()
+	lt := t.Local()
+	return lt.Format("2006-01-02T15:04:05")
+}
+
 func TimestampToUTCZTimestring(ts int64) string {
 	nsts := NanosecondTimestamp{}
 	nsts.Set(ts)
 	return nsts.ToUTCZ()
 }
 
-// UTCTimestamp returns the UTC timestamp
+// UTCTimestamp returns the UTC timestamp in nanoseconds
 func UTCTimestamp() int64 {
 	return time.Now().UTC().UnixNano()
 }
 
+func LocalTimestamp() int64 {
+	return time.Now().UnixNano()
+}
+
+// Nanoseconds converts timestamp in seconds to one in nanoseconds
 func Nanoseconds(tSec float64) int64 {
 	t := tSec * 1000000000
 	return int64(t)
+}
+
+// RoundDownMinutes rounds a timestamp to the minute
+func RoundDownMinutes(tNSec int64) int64 {
+	return (tNSec / 60000000000) * 60000000000
+}
+
+func MinutesEarlier(tNSec int64, minutes int64) int64 {
+	// Minutes to nanoseconds
+	minTs := minutes * 1000000000 * 60
+	return tNSec - minTs
 }
