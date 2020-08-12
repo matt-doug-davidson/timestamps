@@ -261,3 +261,74 @@ func MinutesEarlier(tNSec int64, minutes int64) int64 {
 	minTs := minutes * 1000000000 * 60
 	return tNSec - minTs
 }
+
+type TimestringPair struct {
+	Begin, End string
+}
+
+// GetTimespansFromTimestrings
+func GetTimespansFromTimestrings(start string, stop string, spanDurationMinutes int64) []TimestringPair {
+	span := spanDurationMinutes * 60 * 1000000000
+	//span += 1000000
+	fmt.Println(span)
+
+	// Convert stop to stop to timestamps
+	startTs := UTCZToUTCTimestamp(start)
+	if startTs == -1 {
+		fmt.Println("Error: start time ", start, " conversion failed.")
+		return nil
+	}
+	stopTs := UTCZToUTCTimestamp(stop)
+	if stopTs == -1 {
+		fmt.Println("Error: stop time ", stop, " conversion failed.")
+		return nil
+	}
+	fmt.Println(startTs, stopTs)
+	spanEnd := startTs + span
+	fmt.Println(TimestampToUTCZTimestring(spanEnd))
+	timespans := []TimestringPair{}
+	if startTs+span < stopTs {
+		for beginTs := startTs; beginTs < stopTs; beginTs += span {
+			endTs := beginTs + span
+			if endTs != stopTs {
+				endTs -= 1000000
+				if endTs > stopTs {
+					endTs = stopTs
+				}
+			}
+			fmt.Println(beginTs, endTs)
+			fmt.Println(TimestampToUTCZTimestring(beginTs))
+			fmt.Println(TimestampToUTCZTimestring(endTs))
+			timespans = append(timespans,
+				TimestringPair{TimestampToUTCZTimestring(beginTs),
+					TimestampToUTCZTimestring(endTs)})
+		}
+	} else {
+
+	}
+	return timespans
+}
+
+// IsTimeFirstMinuteOfHour determines if the time provided falls in the first
+// minute of the hour.
+func IsTimeFirstMinuteOfHour(t time.Time) bool {
+	return t.Minute() == 0
+}
+
+// IsNanoTimestampFirstMinuteOfHour determines if the nano timestamp provided
+// falls in the first minute of the hour.
+func IsNanoTimestampFirstMinuteOfHour(t int64) bool {
+	minutes := t / 60000000000
+	return minutes%60 == 0
+}
+
+// AddMinutes adds specified minutes to a timestamp.
+func AddMinutes(ts int64, minutes int64) int64 {
+	return ts + minutes*60000000000
+
+}
+
+// SubtractMinutes subtracts specfied minutes from a timestamp.
+func SubtractMinutes(ts int64, minutes int64) int64 {
+	return ts - minutes*60000000000
+}
